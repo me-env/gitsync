@@ -1,0 +1,4 @@
+# gitsync settings
+IDLE_HOURS=2      # remind when dirty/unpushed work is untouched this long
+REMIND_HOURS=4    # minimum gap between repeated reminders for the same repo
+FETCH_TIMEOUT=30  # seconds before a fetch is abandoned
