@@ -5,7 +5,6 @@
   <key>Label</key><string>com.gitsync.agent</string>
   <key>ProgramArguments</key>
   <array>
-    <string>/bin/bash</string>
     <string>__BIN__</string>
     <string>run</string>
   </array>

@@ -4,6 +4,7 @@
 #   gitsync check   notify about uncommitted/unpushed work idle for IDLE_HOURS
 #   gitsync run     pull, then check (what launchd calls)
 #   gitsync status  print a one-line status per repo
+#   gitsync add DIR track the repo containing DIR (e.g. `gitsync add .`)
 # Bash 3.2 compatible (macOS default shell).
 
 set -u
@@ -153,7 +154,28 @@ status_repo() {
   printf '%-30s %s\n' "$n" "${s:-clean}"
 }
 
+# Append the closest repo containing DIR to $REPOS_FILE (as ~/... when under $HOME).
+add_repo() { # dir
+  local top home entry r
+  top="$(git -C "$1" rev-parse --show-toplevel 2>/dev/null)" || { echo "Not inside a git repo: $1" >&2; return 1; }
+  top="$(cd "$top" && pwd -P)"; home="$(cd "$HOME" && pwd -P)"
+  echo "Repo: $top"
+  if [ -f "$REPOS_FILE" ]; then
+    while IFS= read -r r; do
+      [ -n "$r" ] && [ "$(cd "$r" 2>/dev/null && pwd -P)" = "$top" ] && { echo "Already tracked."; return 0; }
+    done <<EOF
+$(list_repos 2>/dev/null)
+EOF
+  fi
+  case "$top" in "$home"/*) entry="~${top#$home}";; *) entry="$top";; esac
+  mkdir -p "$CONF_DIR"
+  [ -s "$REPOS_FILE" ] && [ -n "$(tail -c1 "$REPOS_FILE")" ] && echo >> "$REPOS_FILE"
+  echo "$entry" >> "$REPOS_FILE"
+  echo "Added $entry to $REPOS_FILE"
+}
+
 cmd="${1:-run}"
+[ "$cmd" = add ] && { add_repo "${2:-.}"; exit; }
 REPOS="$(list_repos)" || exit 1
 PULLED=""
 
@@ -174,5 +196,5 @@ case "$cmd" in
   check)  do_each check_repo ;;
   run)    do_pull; do_each check_repo ;;
   status) do_each status_repo ;;
-  *) sed -n '2,7p' "$0"; exit 1 ;;
+  *) sed -n '2,8p' "$0"; exit 1 ;;
 esac

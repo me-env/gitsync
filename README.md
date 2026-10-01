@@ -25,6 +25,7 @@ The first notification may ask for permission (it comes from "Script Editor"/osa
 | `gitsync pull`   | fetch + fast-forward clean repos              |
 | `gitsync check`  | send "forgot to push?" reminders              |
 | `gitsync status` | one line per repo: dirty / ahead / behind     |
+| `gitsync add .`  | track the repo containing `.` (closest `.git` parent) |
 
 ## Config
 
